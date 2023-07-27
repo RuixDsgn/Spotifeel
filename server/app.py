@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, make_response, session, jsonify
+from flask import Flask, request, make_response, session, jsonify, url_for, redirect
 from flask_migrate import Migrate
 from sqlalchemy import func
 from requests import get, post
@@ -10,13 +10,32 @@ from flask_restful import Resource
 from config import app, db, api
 from models import User, Questionnaire, Mood, Playlist
 import json
+import spotipy
+from  spotipy.oauth2 import SpotifyOAuth
 
+@app.route('/') 
+def login():
+    sp_oauth = create_spotify_oauth()
+    auth_url = sp_oauth.get_authorize_url()
+    return redirect(auth_url)
 
-# token access auth
+@app.route('/redirect')
+def redirectPage():
+    return 'redirect'
+
+# token access auth and o.auth2
 load_dotenv()
 
 client_id = os.getenv('client_id')
 client_secret = os.getenv('client_secret')
+
+def create_spotify_oauth():
+    return SpotifyOAuth(
+        client_id,
+        client_secret,
+        redirect_uri=url_for('redirectPage', _external=True),
+        scope='user-library-read'
+    )
 
 def get_token():
     auth_string = client_id + ':' + client_secret
@@ -68,10 +87,39 @@ def get_songs_by_artist(token, artist_id):
 
 result = search_for_artist(token, "Madeon")
 artist_id = result['id']
+artist_genre = result['genres']
 songs = get_songs_by_artist(token, artist_id)
 
-for idx, song in enumerate(songs):
-    print(f"{idx + 1}. {song['name']}")
+# print(artist_genre)
+
+# for idx, song in enumerate(songs):
+#     print(f"{idx + 1}. {song['name']}")
+
+
+# get req for one track
+def get_one_song(token, track_id):
+    url = f'https://api.spotify.com/v1/tracks/{track_id}'
+    headers = get_auth_header(token)
+    result = get(url, headers=headers)
+    json_result = json.loads(result.content)
+    return json_result
+
+song = get_one_song(token, '5Gggw8WykNhnZsYExUVYxy?si=f39b2f2a54434c55' )
+# print(song)
+
+# get req to show genres
+def get_genres(token):
+    url = 'https://api.spotify.com/v1/recommendations/available-genre-seeds'
+    headers = get_auth_header(token)
+    result = get(url, headers=headers)
+    json_result = json.loads(result.content)
+    return json_result
+
+genres = get_genres(token)
+
+# for index, genre in enumerate(genres['genres']):
+#     print(f'{index + 1}. {genre}')
+
 
 
 # API Routes
@@ -80,6 +128,12 @@ class Songs(Resource):
         return songs
 
 api.add_resource(Songs, '/song')
+
+class Artist(Resource):
+    def get(self):
+        return result
+    
+api.add_resource(Artist, '/artist')
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
