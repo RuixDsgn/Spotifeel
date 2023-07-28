@@ -12,6 +12,9 @@ from models import User, Questionnaire, Mood, Playlist
 import json
 import spotipy
 from  spotipy.oauth2 import SpotifyOAuth
+import time
+
+TOKEN_INFO = 'token_info'
 
 @app.route('/') 
 def login():
@@ -21,14 +24,43 @@ def login():
 
 @app.route('/redirect')
 def redirectPage():
-    return 'redirect'
+    sp_oauth = create_spotify_oauth()
+    session.clear()
+    code = request.args.get('code')
+    token_info = sp_oauth.get_access_token(code)
+    session[TOKEN_INFO] = token_info
+    return redirect(url_for('getTracks', _external=True))
 
-# token access auth and o.auth2
+@app.route('/getTracks')
+def getTracks():
+    try:
+        token_info = get_user_token()
+    except:
+        print('user not logged in')
+        return redirect(url_for('login', _external=True))
+
+    sp = spotipy.Spotify(auth=token_info['access_token'])
+    return sp.current_user_saved_tracks(limit=50, offset=0)
+
+def get_user_token():
+    token_info = session.get(TOKEN_INFO, None)
+    if not token_info:
+        raise "exception"
+    now = int(time.time())
+    is_expired = token_info['expires_at'] - now < 60
+    if (is_expired):
+        sp_oauth = create_spotify_oauth()
+        token_info = sp_oauth.refresh_access_token(token_info['refresh_token'])
+    return token_info
+
+# user_token = get_user_token()
+
 load_dotenv()
 
 client_id = os.getenv('client_id')
 client_secret = os.getenv('client_secret')
 
+# initial o.oath
 def create_spotify_oauth():
     return SpotifyOAuth(
         client_id,
@@ -37,6 +69,7 @@ def create_spotify_oauth():
         scope='user-library-read'
     )
 
+# self token access auth
 def get_token():
     auth_string = client_id + ':' + client_secret
     auth_bytes = auth_string.encode('utf-8')
@@ -90,50 +123,50 @@ artist_id = result['id']
 artist_genre = result['genres']
 songs = get_songs_by_artist(token, artist_id)
 
-# print(artist_genre)
+print(artist_genre)
 
-# for idx, song in enumerate(songs):
-#     print(f"{idx + 1}. {song['name']}")
-
-
-# get req for one track
-def get_one_song(token, track_id):
-    url = f'https://api.spotify.com/v1/tracks/{track_id}'
-    headers = get_auth_header(token)
-    result = get(url, headers=headers)
-    json_result = json.loads(result.content)
-    return json_result
-
-song = get_one_song(token, '5Gggw8WykNhnZsYExUVYxy?si=f39b2f2a54434c55' )
-# print(song)
-
-# get req to show genres
-def get_genres(token):
-    url = 'https://api.spotify.com/v1/recommendations/available-genre-seeds'
-    headers = get_auth_header(token)
-    result = get(url, headers=headers)
-    json_result = json.loads(result.content)
-    return json_result
-
-genres = get_genres(token)
-
-# for index, genre in enumerate(genres['genres']):
-#     print(f'{index + 1}. {genre}')
+for idx, song in enumerate(songs):
+    print(f"{idx + 1}. {song['name']}")
 
 
+# # get req for one track
+# def get_one_song(token, track_id):
+#     url = f'https://api.spotify.com/v1/tracks/{track_id}'
+#     headers = get_auth_header(token)
+#     result = get(url, headers=headers)
+#     json_result = json.loads(result.content)
+#     return json_result
 
-# API Routes
-class Songs(Resource):
-    def get(self):
-        return songs
+# song = get_one_song(token, '5Gggw8WykNhnZsYExUVYxy?si=f39b2f2a54434c55' )
+# # print(song)
 
-api.add_resource(Songs, '/song')
+# # get req to show genres
+# def get_genres(token):
+#     url = 'https://api.spotify.com/v1/recommendations/available-genre-seeds'
+#     headers = get_auth_header(token)
+#     result = get(url, headers=headers)
+#     json_result = json.loads(result.content)
+#     return json_result
 
-class Artist(Resource):
-    def get(self):
-        return result
+# genres = get_genres(token)
+
+# # for index, genre in enumerate(genres['genres']):
+# #     print(f'{index + 1}. {genre}')
+
+
+
+# # API Routes
+# class Songs(Resource):
+#     def get(self):
+#         return songs
+
+# api.add_resource(Songs, '/song')
+
+# class Artist(Resource):
+#     def get(self):
+#         return result
     
-api.add_resource(Artist, '/artist')
+# api.add_resource(Artist, '/artist')
 
-if __name__ == '__main__':
-    app.run(port=5555, debug=True)
+# if __name__ == '__main__':
+#     app.run(port=5555, debug=True)

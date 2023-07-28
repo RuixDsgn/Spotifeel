@@ -25,7 +25,13 @@ class Mood(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     mood = db.Column(db.String)
+    mood_score = db.Column(db.Integer)
 
+class ArtistMood(db.Model, SerializerMixin):
+    __tablename__ = 'artist'
+    id = db.Column(db.Integer, primary_key=True)
+    artist_id = db.Column(db.Integer) 
+    mood_id = db.Column(db.Integer, db.ForeignKey('moods.id'))
 
 class Playlist(db.Model, SerializerMixin):
     __tablename__ = 'playlists'
