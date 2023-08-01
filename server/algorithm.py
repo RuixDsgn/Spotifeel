@@ -87,16 +87,9 @@ class PlaylistGenerator:
             "Dreadful": 7,
             "Jittery": 6
         }
-
-    def select_genres_and_artists(self, mood, adjectives):
-        if mood not in ["happy", "sad", "angry", "fearful"]:
-            return None, None
-
-        if len(adjectives) != 3:
-            return None, None
-
+        
         # Get the numerical values of the selected adjectives for the given mood
-        mood_adjectives = {
+        self.mood_adjectives = {
             "happy": {
                 "adjectives": ["Excited", "Joyful", "Energetic", "Content", "Optimistic", "Playful", "Grateful", "Amused", "Carefree"],
                 "numerical_values": [8, 7, 6, 5, 7, 6, 5, 7, 6]
@@ -114,3 +107,60 @@ class PlaylistGenerator:
                 "numerical_values": [8, 7, 6, 5, 7, 6, 5, 7, 6]
             }
         }
+    
+    def select_genres_and_artists(self, mood, adjectives):
+        if mood not in ["happy", "sad", "angry", "fearful"]:
+            return None, None
+
+        if len(adjectives) != 3:
+            return None, None
+
+        # Get the adjectives and their numerical values associated with the selected mood
+        mood_info = self.mood_adjectives.get(mood)
+        if not mood_info:
+            return None, None
+
+        selected_adjectives = mood_info["adjectives"]
+        adjective_values = mood_info["numerical_values"]
+
+        # Use the adjective-genre mapping to fetch genres based on the adjectives' numerical values
+        selected_genres = set()
+        for adjective, value in zip(selected_adjectives, adjective_values):
+            if adjective in adjectives:
+                selected_genres.update(self.adjective_genre_mapping.get(adjective, []))
+
+        # Fetch artists based on the selected genres from the Spotify Web API
+        selected_artists = self.fetch_artists_from_spotify(selected_genres)
+
+        return list(selected_genres), selected_artists
+
+    def get_adjective_value(self, adjective):
+        return self.adjective_values.get(adjective, 0)
+
+    def fetch_artists_from_spotify(self, genres):
+        # Implement the logic to fetch artists based on the selected genres from the Spotify Web API
+        # and return a list of artists.
+
+        # For simplicity, let's assume you have a list of artists for each genre in the selected genres
+        # Example:
+        artists_by_genre = {
+            "pop": ["Artist1", "Artist2", "Artist3"],
+            "rock": ["Artist4", "Artist5", "Artist6"],
+            # ... (artists for other genres)
+        }
+
+        artists = []
+        for genre in genres:
+            if genre in artists_by_genre:
+                artists.extend(artists_by_genre[genre])
+
+        return artists
+
+# Example usage:
+playlist_generator = PlaylistGenerator()
+selected_mood = "happy"
+selected_adjectives = ["Excited", "Joyful", "Energetic"]
+selected_genres, selected_artists = playlist_generator.select_genres_and_artists(selected_mood, selected_adjectives)
+
+print("Selected Genres:", selected_genres)
+print("Selected Artists:", selected_artists)
