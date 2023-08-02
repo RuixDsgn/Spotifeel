@@ -1,8 +1,9 @@
 import requests
+import spotipy
+from authorization import Token
 
 class PlaylistGenerator:
     def __init__(self):
-        # Sample Adjective-Genre Mapping Dictionary (based on previous example)
         self.adjective_genre_mapping = {
 
             "Excited": ["pop", "dance"],
@@ -88,7 +89,6 @@ class PlaylistGenerator:
             "Jittery": 6
         }
         
-        # Get the numerical values of the selected adjectives for the given mood
         self.mood_adjectives = {
             "happy": {
                 "adjectives": ["Excited", "Joyful", "Energetic", "Content", "Optimistic", "Playful", "Grateful", "Amused", "Carefree"],
@@ -115,7 +115,7 @@ class PlaylistGenerator:
         if len(adjectives) != 3:
             return None, None
 
-        # Get the adjectives and their numerical values associated with the selected mood
+        # Gets the adjectives and their numerical values associated with the selected mood
         mood_info = self.mood_adjectives.get(mood)
         if not mood_info:
             return None, None
@@ -138,23 +138,30 @@ class PlaylistGenerator:
         return self.adjective_values.get(adjective, 0)
 
     def fetch_artists_from_spotify(self, genres):
-        # Implement the logic to fetch artists based on the selected genres from the Spotify Web API
-        # and return a list of artists.
+        sp = spotipy.Spotify(auth=token)
+        genre = 'pop'
+        results = sp.search(q=f'genre:{genre}', type='artist', limit=10)
 
-        # For simplicity, let's assume you have a list of artists for each genre in the selected genres
-        # Example:
-        artists_by_genre = {
-            "pop": ["Artist1", "Artist2", "Artist3"],
-            "rock": ["Artist4", "Artist5", "Artist6"],
-            # ... (artists for other genres)
-        }
+        artists = [artist['name'] for artist in results['artists']['items']]
+        artists_id = [artist['id'] for artist in results['artists']['items']]
 
-        artists = []
-        for genre in genres:
-            if genre in artists_by_genre:
-                artists.extend(artists_by_genre[genre])
+        print ('Pop:', artists, artists_id)
 
-        return artists
+
+        # # For simplicity, let's assume you have a list of artists for each genre in the selected genres
+        # # Example:
+        # artists_by_genre = {
+        #     "pop": ["Artist1", "Artist2", "Artist3"],
+        #     "rock": ["Artist4", "Artist5", "Artist6"],
+        #     # ... (artists for other genres)
+        # }
+
+        # artists = []
+        # for genre in genres:
+        #     if genre in artists_by_genre:
+        #         artists.extend(artists_by_genre[genre])
+
+        # return artists
 
 # Example usage:
 playlist_generator = PlaylistGenerator()

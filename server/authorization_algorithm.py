@@ -1,53 +1,98 @@
-from flask import Flask, request, jsonify, redirect
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
 import os
+from flask import Flask, request, make_response, session, jsonify, url_for, redirect
+from flask_migrate import Migrate
+from sqlalchemy import func
+from requests import get, post
 from dotenv import load_dotenv
-from flask_cors import CORS
+import base64
+from flask import request
+from flask_restful import Resource
+from config import app, db, api
+import json
+import spotipy
+from  spotipy.oauth2 import SpotifyOAuth
+import time
 
+# O.AUTH2
+TOKEN_INFO = 'token_info'
+
+def create_spotify_oauth():
+    return SpotifyOAuth(
+        client_id,
+        client_secret,
+        redirect_uri=url_for('redirectPage', _external=True),
+        scope='user-library-read'
+    )
+
+@app.route('/')
+def home():
+    return 'spotifeel'
+
+@app.route('/spotify-login') 
+def login():
+    sp_oauth = create_spotify_oauth()
+    auth_url = sp_oauth.get_authorize_url()
+    return redirect(auth_url)
+
+@app.route('/redirect')
+def redirectPage():
+    sp_oauth = create_spotify_oauth()
+    session.clear()
+    code = request.args.get('code')
+    token_info = sp_oauth.get_access_token(code)
+    session[TOKEN_INFO] = token_info
+    return redirect(url_for('getTracks', _external=True))
+
+# @app.route('/createPlaylist')
+# def createPlaylist():
+#     try:
+#         token_info = get_user_token()
+#     except:
+#         print('user not logged in')
+#         return redirect(url_for('login', _external=True))
+
+#     sp = spotipy.Spotify(auth=token_info['access_token'])
+#     return sp.crurrent_user_saved_tracks(limit=50, offset=0)
+
+def get_user_token():
+    token_info = session.get(TOKEN_INFO, None)
+    if not token_info:
+        raise Exception()
+    now = int(time.time())
+    is_expired = token_info['expires_at'] - now < 60
+    if (is_expired):
+        sp_oauth = create_spotify_oauth()
+        token_info = sp_oauth.refresh_access_token(token_info['refresh_token'])
+    return token_info
+
+
+# WEB_APP TOKEN
 load_dotenv()
 
-app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:4000"}})
-app.secret_key = os.getenv('secret_key') 
-
-# Spotify app credentials
 client_id = os.getenv('client_id')
 client_secret = os.getenv('client_secret')
-redirect_uri = 'http://localhost:4000/callback'
 
-# Function to generate the Spotify OAuth2 URL
-def get_spotify_oauth_url():
-    auth_manager = SpotifyOAuth(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope='playlist-modify-public')
-    auth_url = auth_manager.get_authorize_url()
-    return auth_url
 
-@app.route('/get_auth_url')
-def get_auth_url():
-    auth_url = get_spotify_oauth_url()
-    return jsonify({'auth_url': auth_url})
+def get_token():
+    auth_string = client_id + ':' + client_secret
+    auth_bytes = auth_string.encode('utf-8')
+    auth_base64 = str(base64.b64encode(auth_bytes), 'utf-8')
 
-@app.route('/callback')
-def callback():
-    # Handle the Spotify OAuth2 callback and return the access token
-    auth_manager = SpotifyOAuth(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope='playlist-modify-public')
-    access_token = auth_manager.get_access_token(request.args['code'])
-    return jsonify({'access_token': access_token})
+    url = 'https://accounts.spotify.com/api/token'
+    headers = {
+        'Authorization': 'Basic ' + auth_base64,
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    data = {'grant_type': 'client_credentials'}
+    result = post(url, headers=headers, data=data)
+    json_result = result.json()
+    token = json_result['access_token']
+    return token
 
-@app.route('/generate_playlist', methods=['POST'])
-def generate_playlist():
-    access_token = request.json['access_token']
-    mood = request.json['mood']
-    adjectives = request.json['adjectives']
-    redirect_uri = request.json['redirect_uri']  # Add the provided 'redirect_uri'
+token = get_token()
 
-    # Call the playlist generation method here with the access_token, mood, adjectives, and playlist name
-    playlist = generate_spotify_playlist(access_token, mood, adjectives, 'My Playlist')
 
-    if playlist:
-        return jsonify({'message': 'Playlist created successfully!'})
-    else:
-        return jsonify({'error': 'Failed to generate playlist.'})
+# MOOD_GENRE MAPPING ALGORITHM
 def fetch_artists_from_spotify(token, genres):
     sp = spotipy.Spotify(auth=token)
     artists = []
@@ -70,7 +115,7 @@ def create_playlist(token, playlist_name, tracks):
     sp.user_playlist_add_tracks(sp.me()['id'], playlist['id'], tracks)
     return playlist
 
-def generate_spotify_playlist(token, mood, adjectives, playlist_name):
+def generate_playlist(token, mood, adjectives, playlist_name):
     adjective_genre_mapping = {
             "Excited": ["pop", "dance"],
             "Joyful": ["pop", "indie pop"],
@@ -150,5 +195,8 @@ def generate_spotify_playlist(token, mood, adjectives, playlist_name):
 
     return create_playlist(token, playlist_name, tracks)
 
-if __name__ == '__main__':
-    app.run(debug=True, port=5555)
+# Example usage:
+selected_mood = "happy"
+selected_adjectives = ["Excited", "Joyful", "Energetic"]
+playlist_name = "My Awesome Playlist"
+generate_playlist(token, selected_mood, selected_adjectives, playlist_name)
