@@ -1,20 +1,90 @@
-import React, { useEffect, useState } from "react";
-import { Switch, Route } from "react-router-dom";
-import LandingPage from "./LandingPage";
-import Question1 from "./Question1";
-import Question2 from "./Question2";
-import ConnectSpotify from "./ConnectSpotify";
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Link, Outlet, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import queryString from 'query-string';
+import WelcomePage from './WelcomePage';
+import MoodSelectionPage from './MoodSelectionPage';
+import AdjectiveSelectionPage from './AdjectiveSelectionPage';
 
-function App() {
-  return 
-  <div>
-    <LandingPage />
-    <Question1 />
-    <Question2 />
-    <ConnectSpotify />
-  </div>
+const App = () => {
+  const [authUrl, setAuthUrl] = useState('');
+  const [accessToken, setAccessToken] = useState('');
+  const [mood, setMood] = useState('');
+  const [adjectives, setAdjectives] = useState(['', '', '']);
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    axios.get('/get_auth_url')
+      .then(response => {
+        setAuthUrl(response.data.auth_url);
+      })
+      .catch(error => {
+        console.error('Error fetching authentication URL:', error);
+      });
 
-}
+    const params = queryString.parse(window.location.search);
+    const code = params.code;
+    if (code) {
+      handleAuthCallback(code);
+    }
+  }, []);
+
+  const handleAuthCallback = (code) => {
+    axios.get(`/callback?code=${code}`)
+      .then(response => {
+        setAccessToken(response.data.access_token);
+        console.log("Access Token (Frontend):", response.data.access_token);
+        window.history.replaceState({}, document.title, '/');
+        navigate('/generate');
+      })
+      .catch(error => {
+        console.error('Error fetching access token:', error);
+      });
+  };
+
+  const handleGeneratePlaylist = () => {
+    axios.post('/generate_playlist', { access_token: accessToken, mood, adjectives, redirect_uri: 'http://localhost:4000/callback' })
+      .then(response => {
+        setMessage(response.data.message);
+      })
+      .catch(error => {
+        console.error('Error generating playlist:', error);
+      });
+  };
+
+  return (
+    <Router>
+      <div>
+        <h1>Spotify Playlist Generator</h1>
+        <Routes>
+          <Route path="/" element={<WelcomePage />} />
+          <Route
+            path="/mood"
+            element={<MoodSelectionPage setMood={setMood} navigate={navigate} />}
+          />
+          <Route
+            path="/adjectives"
+            element={<AdjectiveSelectionPage mood={mood} setAdjectives={setAdjectives} navigate={navigate} handleGeneratePlaylist={handleGeneratePlaylist} />}
+          />
+          <Route path="/generate" element={<div>
+            <h2>Playlist Generated!</h2>
+            <p>{message}</p>
+            <p>Choose one of the options below:</p>
+            <Link to="/spotify-app">Open in Spotify App</Link>
+            <Link to="/spotify-web">Open in Spotify Web Player</Link>
+            <Link to="/mood">Start Over</Link>
+          </div>} />
+          <Route path="/spotify-app" element={<div>
+            <h2>Opening in Spotify App...</h2>
+          </div>} />
+          <Route path="/spotify-web" element={<div>
+            <h2>Opening in Spotify Web Player...</h2>
+          </div>} />
+        </Routes>
+      </div>
+    </Router>
+  );
+};
 
 export default App;
