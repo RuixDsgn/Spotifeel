@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link, Outlet, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import queryString from 'query-string';
 import WelcomePage from './WelcomePage';
@@ -12,7 +12,6 @@ const App = () => {
   const [mood, setMood] = useState('');
   const [adjectives, setAdjectives] = useState(['', '', '']);
   const [message, setMessage] = useState('');
-  const navigate = useNavigate();
 
   useEffect(() => {
     axios.get('/get_auth_url')
@@ -23,6 +22,7 @@ const App = () => {
         console.error('Error fetching authentication URL:', error);
       });
 
+    // Check if the URL contains the access token
     const params = queryString.parse(window.location.search);
     const code = params.code;
     if (code) {
@@ -35,14 +35,14 @@ const App = () => {
       .then(response => {
         setAccessToken(response.data.access_token);
         console.log("Access Token (Frontend):", response.data.access_token);
+        // Remove the access token from the URL to prevent displaying it
         window.history.replaceState({}, document.title, '/');
-        navigate('/generate');
       })
       .catch(error => {
         console.error('Error fetching access token:', error);
       });
   };
-
+  
   const handleGeneratePlaylist = () => {
     axios.post('/generate_playlist', { access_token: accessToken, mood, adjectives, redirect_uri: 'http://localhost:4000/callback' })
       .then(response => {
@@ -58,14 +58,14 @@ const App = () => {
       <div>
         <h1>Spotify Playlist Generator</h1>
         <Routes>
-          <Route path="/" element={<WelcomePage />} />
+          <Route path="/" element={<WelcomePage authUrl={authUrl} />} />
           <Route
             path="/mood"
-            element={<MoodSelectionPage setMood={setMood} navigate={navigate} />}
+            element={<MoodSelectionPage setMood={setMood} />}
           />
           <Route
             path="/adjectives"
-            element={<AdjectiveSelectionPage mood={mood} setAdjectives={setAdjectives} navigate={navigate} handleGeneratePlaylist={handleGeneratePlaylist} />}
+            element={<AdjectiveSelectionPage mood={mood} setAdjectives={setAdjectives} handleGeneratePlaylist={handleGeneratePlaylist} />}
           />
           <Route path="/generate" element={<div>
             <h2>Playlist Generated!</h2>

@@ -32,7 +32,7 @@ def get_auth_url():
 
 @app.route('/callback')
 def callback():
-    # Handle the Spotify OAuth2 callback and return the access token
+    # Handle the Spotify OAuth2 callback and redirect the user to the frontend app with the code as a query parameter
     auth_manager = SpotifyOAuth(
                    client_id=client_id, 
                    client_secret=client_secret, 
@@ -40,7 +40,7 @@ def callback():
                    scope='playlist-modify-public,user-library-read')
     access_token = auth_manager.get_access_token(request.args['code'], as_dict=False)
     print(access_token)
-    return jsonify({'access_token': access_token})
+    return redirect('http://localhost:4000/mood?code=' + access_token)
 
 @app.route('/generate_playlist', methods=['POST'])
 def generate_playlist():

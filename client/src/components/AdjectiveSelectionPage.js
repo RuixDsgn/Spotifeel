@@ -1,11 +1,8 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const AdjectiveSelectionPage = ({ mood, setAdjectives, navigate, handleGeneratePlaylist }) => {
-  const location = useLocation();
-
-  // Define the adjectives based on the selected mood
-  const moodAdjectives = {
+const AdjectiveSelectionPage = ({ mood, setAdjectives, handleGeneratePlaylist }) => {
+  const mood_adjectives = {
     "happy": {
       "adjectives": ["Excited", "Joyful", "Energetic", "Content", "Optimistic", "Playful", "Grateful", "Amused", "Carefree"],
       "numerical_values": [8, 7, 6, 5, 7, 6, 5, 7, 6]
@@ -24,43 +21,50 @@ const AdjectiveSelectionPage = ({ mood, setAdjectives, navigate, handleGenerateP
     }
   };
 
-  // Get the adjectives for the selected mood
-  const selectedAdjectives = moodAdjectives[mood]?.adjectives || [];
+  const [selectedAdjectives, setSelectedAdjectives] = useState([]);
 
-  const handleAdjectiveChange = (index, adjective) => {
-    const updatedAdjectives = [...selectedAdjectives];
-    updatedAdjectives[index] = adjective;
-    setAdjectives(updatedAdjectives);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleAdjectiveSelection = (adjective) => {
+    // Check if the adjective is already selected, and if so, remove it from the selectedAdjectives array.
+    if (selectedAdjectives.includes(adjective)) {
+      setSelectedAdjectives((prevSelected) => prevSelected.filter((item) => item !== adjective));
+    } else {
+      // If the adjective is not selected, add it to the selectedAdjectives array.
+      setSelectedAdjectives((prevSelected) => [...prevSelected, adjective]);
+    }
   };
 
-  const handleGenerateClick = () => {
-    if (selectedAdjectives.length === 3 && selectedAdjectives.every(Boolean)) {
-      // All 3 adjectives have been selected, call the handleGeneratePlaylist function
+  const handlePlaylistGeneration = () => {
+    if (selectedAdjectives.length === 3) {
+      // Assuming you have the logic to set 'accessToken' and 'message' states in App.js
+      setAdjectives(selectedAdjectives);
       handleGeneratePlaylist();
+      navigate('/generate');
     } else {
-      alert('Please select 3 adjectives.');
+      // Show an error message or alert to indicate that the user must select exactly 3 adjectives.
+      alert('Please select exactly 3 adjectives to generate the playlist.');
     }
   };
 
   return (
     <div>
       <h2>Adjective Selection</h2>
-      <p>Selected Mood: {mood}</p>
-      <p>Select 3 adjectives that represent your current mood:</p>
+      <p>Select adjectives that represent your mood: {mood}</p>
       <ul>
-        {selectedAdjectives.map((adjective, index) => (
+        {mood_adjectives[mood]?.adjectives.map((adjective, index) => (
           <li key={index}>
-            <input
-              type="text"
-              value={adjective}
-              onChange={(e) => handleAdjectiveChange(index, e.target.value)}
-            />
+            <button
+              className={selectedAdjectives.includes(adjective) ? 'selected' : ''}
+              onClick={() => handleAdjectiveSelection(adjective)}
+            >
+              {adjective}
+            </button>
           </li>
         ))}
       </ul>
-      <button onClick={handleGenerateClick}>Generate Playlist</button>
-      <br />
-      <button onClick={() => navigate('/mood')}>Back</button>
+      <button onClick={handlePlaylistGeneration}>Generate Playlist</button>
     </div>
   );
 };

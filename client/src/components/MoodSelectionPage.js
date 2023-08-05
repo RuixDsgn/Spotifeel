@@ -1,14 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const MoodSelectionPage = () => {
+const MoodSelectionPage = ({ setMood }) => {
+  const handleMoodSelection = (mood) => {
+    setMood(mood);
+  };
+
   return (
     <div>
       <h2>Choose Your Mood</h2>
-      <Link to="/adjective?mood=happy">Happy</Link>
-      <Link to="/adjective?mood=sad">Sad</Link>
-      <Link to="/adjective?mood=angry">Angry</Link>
-      <Link to="/adjective?mood=fearful">Fearful</Link>
+      <Link to="/adjectives" onClick={() => handleMoodSelection('happy')}>Happy</Link>
+      <Link to="/adjectives" onClick={() => handleMoodSelection('sad')}>Sad</Link>
+      <Link to="/adjectives" onClick={() => handleMoodSelection('angry')}>Angry</Link>
+      <Link to="/adjectives" onClick={() => handleMoodSelection('fearful')}>Fearful</Link>
     </div>
   );
 };
