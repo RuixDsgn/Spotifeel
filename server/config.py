@@ -8,7 +8,10 @@ from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 
-# Local imports
+# spotify credentials
+client_id = 'bcba09cb1f4441edb08d0e5bdf2799a2'
+client_secret = 'b264de26c4c74ed784a8a187cdafb085'
+secret_key = 'dullescythe'
 
 # Instantiate app, set attributes
 app = Flask(__name__)

@@ -6,12 +6,13 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:4000"}})
-app.secret_key = 'dullescythe' 
+app.secret_key = os.environ.get('secret_key') 
 
 # Spotify app credentials
-client_id = 'bcba09cb1f4441edb08d0e5bdf2799a2'
-client_secret = 'b264de26c4c74ed784a8a187cdafb085'
-redirect_uri = 'http://localhost:4000/callback'
+client_id = os.environ.get('client_id')
+client_secret = os.environ.get('client_secret')
+redirect_uri = 'http://localhost:4000/mood'
+
 
 CACHE_PATH = os.path.join(os.getcwd(), 'spotify_cache')
 
@@ -32,22 +33,29 @@ def get_auth_url():
 
 @app.route('/callback')
 def callback():
-    # Handle the Spotify OAuth2 callback and redirect the user to the frontend app with the code as a query parameter
+    # Handle the Spotify OAuth2 callback and respond with the access token
     auth_manager = SpotifyOAuth(
-                   client_id=client_id, 
-                   client_secret=client_secret, 
-                   redirect_uri=redirect_uri, 
-                   scope='playlist-modify-public,user-library-read')
-    access_token = auth_manager.get_access_token(request.args['code'], as_dict=False)
-    print(access_token)
-    return redirect('http://localhost:4000/mood?code=' + access_token)
+        client_id=client_id,
+        client_secret=client_secret,
+        redirect_uri=redirect_uri,
+        scope='playlist-modify-public,user-library-read')
 
-@app.route('/generate_playlist', methods=['POST'])
+    try:
+        access_token = auth_manager.get_access_token(request.args['code'], as_dict=False)
+        print("Access Token:", access_token)
+        return jsonify({'access_token': access_token})  # Return access token as JSON
+    except spotipy.exceptions.SpotifyException as e:
+        print("Error fetching access token:", e)
+        return jsonify({'error': 'Failed to fetch access token.'}), 500
+
+@app.route('/generate', methods=['POST'])
 def generate_playlist():
     access_token = request.json['access_token']
     print("Access Token:", access_token)
     mood = request.json['mood']
     adjectives = request.json['adjectives']
+
+    print("Selected Adjectives (Backend):", adjectives) 
 
     # Check if the access token is valid
     if not check_access_token(access_token):
@@ -55,13 +63,40 @@ def generate_playlist():
 
     # Call the playlist generation method here with the access_token, mood, adjectives, and playlist name
     playlist_name = 'My Playlist'
-    playlist = generate_spotify_playlist(access_token, mood, adjectives, playlist_name)
+    playlist_id = generate_spotify_playlist(access_token, mood, adjectives, playlist_name)
 
-    if playlist:
-        return jsonify({'message': 'Playlist created successfully!'})
+    if playlist_id:
+        return jsonify({'playlist_id': playlist_id})
     else:
         return jsonify({'error': 'Failed to generate playlist.'}), 500
-    
+
+@app.route('/playlist-details')
+def playlist_details():
+    access_token = request.args['access_token']
+    playlist_id = request.args['playlist_id']
+
+    # Check if the access token is valid
+    if not check_access_token(access_token):
+        return jsonify({'error': 'Authentication failed. Please check your credentials.'}), 401
+
+    # Fetch the playlist details using the Spotify API
+    playlist = fetch_playlist_details(access_token, playlist_id)
+
+    if playlist:
+        return jsonify(playlist)
+    else:
+        return jsonify({'error': 'Failed to fetch playlist details.'}), 500
+
+def fetch_playlist_details(access_token, playlist_id):
+    try:
+        sp = spotipy.Spotify(auth=access_token)
+        playlist = sp.playlist(playlist_id)
+        return playlist
+    except spotipy.exceptions.SpotifyException as e:
+        print("An error occurred while fetching playlist details.")
+        print("Error message:", e)
+        return None
+        
 def check_access_token(access_token):
     try:
         sp = spotipy.Spotify(auth=access_token)
