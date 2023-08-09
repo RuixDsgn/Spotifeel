@@ -69,33 +69,53 @@ def generate_playlist():
         return jsonify({'playlist_id': playlist_id})
     else:
         return jsonify({'error': 'Failed to generate playlist.'}), 500
-
-@app.route('/playlist-details')
-def playlist_details():
+    
+@app.route('/playlists')
+def user_playlists():
     access_token = request.args['access_token']
-    playlist_id = request.args['playlist_id']
-
-    # Check if the access token is valid
-    if not check_access_token(access_token):
-        return jsonify({'error': 'Authentication failed. Please check your credentials.'}), 401
-
-    # Fetch the playlist details using the Spotify API
-    playlist = fetch_playlist_details(access_token, playlist_id)
-
-    if playlist:
-        return jsonify(playlist)
+    playlists = fetch_user_playlists(access_token)
+    if playlists:
+        return jsonify({'playlists': playlists})
     else:
-        return jsonify({'error': 'Failed to fetch playlist details.'}), 500
+        return jsonify({'error': 'Failed to fetch user playlists.'}), 500
 
-def fetch_playlist_details(access_token, playlist_id):
+def fetch_user_playlists(access_token):
     try:
         sp = spotipy.Spotify(auth=access_token)
-        playlist = sp.playlist(playlist_id)
-        return playlist
+        playlists = sp.current_user_playlists()
+        return playlists
     except spotipy.exceptions.SpotifyException as e:
-        print("An error occurred while fetching playlist details.")
+        print("An error occurred while fetching user playlists.")
         print("Error message:", e)
         return None
+
+
+# @app.route('/playlist-details')
+# def playlist_details():
+#     access_token = request.args['access_token']
+#     playlist_id = request.args['playlist_id']
+
+#     # Check if the access token is valid
+#     if not check_access_token(access_token):
+#         return jsonify({'error': 'Authentication failed. Please check your credentials.'}), 401
+
+#     # Fetch the playlist details using the Spotify API
+#     playlist = fetch_playlist_details(access_token, playlist_id)
+
+#     if playlist:
+#         return jsonify(playlist)
+#     else:
+#         return jsonify({'error': 'Failed to fetch playlist details.'}), 500
+
+# def fetch_playlist_details(access_token, playlist_id):
+#     try:
+#         sp = spotipy.Spotify(auth=access_token)
+#         playlist = sp.playlist(playlist_id)
+#         return playlist
+#     except spotipy.exceptions.SpotifyException as e:
+#         print("An error occurred while fetching playlist details.")
+#         print("Error message:", e)
+#         return None
         
 def check_access_token(access_token):
     try:

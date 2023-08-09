@@ -6,6 +6,7 @@ import WelcomePage from './WelcomePage';
 import MoodSelectionPage from './MoodSelectionPage';
 import AdjectiveSelectionPage from './AdjectiveSelectionPage';
 import NewPlaylistPage from './NewPlaylistPage';
+import ShowPlaylistPage from './ShowPlaylistPage';
 import './index.css';
 
 const App = () => {
@@ -58,9 +59,6 @@ const App = () => {
         .then(response => {
           setMessage(response.data.message);
           console.log(message);
-          const newPlaylistId = response.data.playlist_id;
-          // Redirect the user to the NewPlaylistPage with the new playlist ID
-          return <Navigate to={`/newplaylist/${newPlaylistId}`} />;
         })
         .catch(error => {
           console.error('Error generating playlist:', error);
@@ -79,7 +77,7 @@ const App = () => {
           <Route path="/mood" element={<MoodSelectionPage setMood={setMood} />} />
           <Route path="/adjectives" element={<AdjectiveSelectionPage mood={mood} setAdjectives={setAdjectives} handleGeneratePlaylist={handleGeneratePlaylist} />} />
           <Route path="/generate" element={<NewPlaylistPage accessToken={accessToken} />} />
-          <Route path="/newplaylist" element={<NewPlaylistPage accessToken={accessToken} />} />
+          <Route path="/playlists" element={<ShowPlaylistPage accessToken={accessToken} />} />
         </Routes>
       </div>
     </Router>
