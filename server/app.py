@@ -254,6 +254,7 @@ def generate_spotify_playlist(access_token, mood, adjectives, playlist_name):
         print("Playlist created successfully!")
         return playlist
 
+
     except spotipy.exceptions.SpotifyException as e:
         print("An error occurred while fetching recommendations from Spotify.")
         print("Error message:", e)

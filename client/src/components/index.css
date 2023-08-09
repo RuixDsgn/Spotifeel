@@ -1,0 +1,159 @@
+
+body {
+  background-image: url('https://64.media.tumblr.com/3259733aa0ebf8cbc911a973abc34858/tumblr_ptoq3mvKrp1qgx2ngo1_1280.png');
+  background-color: #cccccc;
+  width: 100%;
+}
+
+h1 {
+  margin-top: 200px;
+  -webkit-text-stroke:2.5px white;
+  -webkit-text-fill-color: transparent;
+  font-family: 'Merriweather', serif;
+}
+
+h2 {
+	font-family: 'Roboto', sans-serif;
+	text-align: center;
+}
+
+p {
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* Welcome Page */
+
+.welcome-page-div {
+	text-align: center;
+}
+
+.myButton {
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:linear-gradient(to bottom, #ededed 5%, #dfdfdf 100%);
+	background-color:#ededed;
+	border-radius:6px;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	cursor:pointer;
+	color:#777777;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #ffffff;
+}
+.myButton:hover {
+	background:linear-gradient(to bottom, #dfdfdf 5%, #ededed 100%);
+	background-color:#dfdfdf;
+	color: green;
+}
+.myButton:active {
+	position:relative;
+	top:1px;
+}
+
+/* Mood Selection */
+
+.mood-h2 {
+	margin-top: 200px;
+}
+
+.myMoodButton {
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:linear-gradient(to bottom, #ededed 5%, #dfdfdf 100%);
+	background-color:#ededed;
+	border-radius:6px;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	cursor:pointer;
+	color:#777777;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #ffffff;
+	margin: auto;
+	display: flex;
+	justify-content: center;
+	width: 20%;
+}
+.myMoodButton:hover {
+	background:linear-gradient(to bottom, #dfdfdf 5%, #ededed 100%);
+	background-color:#dfdfdf;
+	color: green;
+}
+.myMoodButton:active {
+	position:relative;
+	top:1px;
+}
+
+/* Adjective Selection */
+
+.adjective-h2 {
+	margin-top: 200px;
+	text-align: center;
+}
+
+.myAdjectiveButton {
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:linear-gradient(to bottom, #ededed 5%, #dfdfdf 100%);
+	background-color:#ededed;
+	border-radius:6px;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	cursor:pointer;
+	color:#777777;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #ffffff;
+	margin: auto;
+	display: flex;
+	justify-content: center;
+	width: 30%;
+}
+.myAdjectiveButton:hover {
+	background:linear-gradient(to bottom, #dfdfdf 5%, #ededed 100%);
+	background-color:#dfdfdf;
+	color: green;
+}
+.myAdjectiveButton:active {
+	position:relative;
+	top:1px;
+}
+
+.adjective-buttons-div {
+	width: 40%;
+	margin: auto;
+}
+
+#adjective-buttons {
+	margin-right: 30px;
+	margin-bottom: 10px;
+	background-color: transparent;
+	border: 2px solid #555555;
+	border-radius: 5px;
+	padding: 10px;
+}
+
+#adjective-buttons-active {
+	color: green;
+	border: 2px solid green;
+	margin-right: 30px;
+	margin-bottom: 10px;
+	background-color: transparent;
+	border-radius: 5px;
+	padding: 10px;
+
+}
+
+.generate-button {
+	margin: auto;
+	display: flex;
+	justify-content: center;
+
+}

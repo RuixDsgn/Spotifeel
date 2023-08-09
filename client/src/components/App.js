@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import queryString from 'query-string';
 import WelcomePage from './WelcomePage';
 import MoodSelectionPage from './MoodSelectionPage';
 import AdjectiveSelectionPage from './AdjectiveSelectionPage';
+import NewPlaylistPage from './NewPlaylistPage';
+import './index.css';
 
 const App = () => {
   const [authUrl, setAuthUrl] = useState('');
   const [accessToken, setAccessToken] = useState('');
   const [mood, setMood] = useState('');
-  const [adjectives, setAdjectives] = useState(['', '', '']);
+  const [adjectives, setAdjectives] = useState([]);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     axios.get('/get_auth_url')
       .then(response => {
+        console.log('Authentication URL response:', response.data);
         setAuthUrl(response.data.auth_url);
       })
       .catch(error => {
@@ -31,6 +34,8 @@ const App = () => {
   }, []);
 
   const handleAuthCallback = (code) => {
+    console.log('Handling auth callback with code:', code);
+  
     axios.get(`/callback?code=${code}`)
       .then(response => {
         setAccessToken(response.data.access_token);
@@ -40,47 +45,41 @@ const App = () => {
       })
       .catch(error => {
         console.error('Error fetching access token:', error);
+        // Handle the error here (e.g., show an error message to the user)
       });
   };
   
-  const handleGeneratePlaylist = () => {
-    axios.post('/generate_playlist', { access_token: accessToken, mood, adjectives, redirect_uri: 'http://localhost:4000/callback' })
-      .then(response => {
-        setMessage(response.data.message);
-      })
-      .catch(error => {
-        console.error('Error generating playlist:', error);
-      });
+  
+  const handleGeneratePlaylist = (adjectives) => {
+    // Ensure the user is authenticated before generating the playlist
+    if (accessToken) {
+      console.log("Selected Adjectives (Frontend):", adjectives); // Log the selected adjectives
+      axios.post('/generate', { access_token: accessToken, mood, adjectives, redirect_uri: 'http://localhost:4000/mood' })
+        .then(response => {
+          setMessage(response.data.message);
+          console.log(message);
+          const newPlaylistId = response.data.playlist_id;
+          // Redirect the user to the NewPlaylistPage with the new playlist ID
+          return <Navigate to={`/newplaylist/${newPlaylistId}`} />;
+        })
+        .catch(error => {
+          console.error('Error generating playlist:', error);
+        });
+    } else {
+      // Handle the case where the user is not authenticated yet
+      console.log("User is not authenticated. Please log in with Spotify first.");
+    }
   };
 
   return (
     <Router>
       <div>
-        <h1>Spotify Playlist Generator</h1>
         <Routes>
           <Route path="/" element={<WelcomePage authUrl={authUrl} />} />
-          <Route
-            path="/mood"
-            element={<MoodSelectionPage setMood={setMood} />}
-          />
-          <Route
-            path="/adjectives"
-            element={<AdjectiveSelectionPage mood={mood} setAdjectives={setAdjectives} handleGeneratePlaylist={handleGeneratePlaylist} />}
-          />
-          <Route path="/generate" element={<div>
-            <h2>Playlist Generated!</h2>
-            <p>{message}</p>
-            <p>Choose one of the options below:</p>
-            <Link to="/spotify-app">Open in Spotify App</Link>
-            <Link to="/spotify-web">Open in Spotify Web Player</Link>
-            <Link to="/mood">Start Over</Link>
-          </div>} />
-          <Route path="/spotify-app" element={<div>
-            <h2>Opening in Spotify App...</h2>
-          </div>} />
-          <Route path="/spotify-web" element={<div>
-            <h2>Opening in Spotify Web Player...</h2>
-          </div>} />
+          <Route path="/mood" element={<MoodSelectionPage setMood={setMood} />} />
+          <Route path="/adjectives" element={<AdjectiveSelectionPage mood={mood} setAdjectives={setAdjectives} handleGeneratePlaylist={handleGeneratePlaylist} />} />
+          <Route path="/generate" element={<NewPlaylistPage accessToken={accessToken} />} />
+          <Route path="/newplaylist" element={<NewPlaylistPage accessToken={accessToken} />} />
         </Routes>
       </div>
     </Router>

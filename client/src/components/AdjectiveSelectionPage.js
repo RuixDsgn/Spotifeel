@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const AdjectiveSelectionPage = ({ mood, setAdjectives, handleGeneratePlaylist }) => {
   const mood_adjectives = {
@@ -22,49 +22,46 @@ const AdjectiveSelectionPage = ({ mood, setAdjectives, handleGeneratePlaylist })
   };
 
   const [selectedAdjectives, setSelectedAdjectives] = useState([]);
+  const [pickedAdjective, setPickedAdjective] = useState('')
 
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleAdjectiveSelection = (adjective) => {
-    // Check if the adjective is already selected, and if so, remove it from the selectedAdjectives array.
     if (selectedAdjectives.includes(adjective)) {
       setSelectedAdjectives((prevSelected) => prevSelected.filter((item) => item !== adjective));
     } else {
-      // If the adjective is not selected, add it to the selectedAdjectives array.
       setSelectedAdjectives((prevSelected) => [...prevSelected, adjective]);
     }
   };
 
   const handlePlaylistGeneration = () => {
     if (selectedAdjectives.length === 3) {
-      // Assuming you have the logic to set 'accessToken' and 'message' states in App.js
-      setAdjectives(selectedAdjectives);
-      handleGeneratePlaylist();
+      setAdjectives(selectedAdjectives); // Set adjectives in the state
+      handleGeneratePlaylist(selectedAdjectives); // Pass selectedAdjectives to handleGeneratePlaylist
+      console.log(selectedAdjectives)
       navigate('/generate');
     } else {
-      // Show an error message or alert to indicate that the user must select exactly 3 adjectives.
       alert('Please select exactly 3 adjectives to generate the playlist.');
     }
   };
-
+  
   return (
     <div>
-      <h2>Adjective Selection</h2>
-      <p>Select adjectives that represent your mood: {mood}</p>
-      <ul>
-        {mood_adjectives[mood]?.adjectives.map((adjective, index) => (
-          <li key={index}>
-            <button
-              className={selectedAdjectives.includes(adjective) ? 'selected' : ''}
-              onClick={() => handleAdjectiveSelection(adjective)}
-            >
-              {adjective}
-            </button>
-          </li>
-        ))}
-      </ul>
-      <button onClick={handlePlaylistGeneration}>Generate Playlist</button>
+      <h2 className='adjective-h2'>If you could describe your mood: {mood}, in using three adjectives, what would they be?</h2><br />
+      <div className='adjective-buttons-div'>
+  {mood_adjectives[mood]?.adjectives.map((adjective, index) => (
+    <button
+      id={selectedAdjectives.includes(adjective) ? 'adjective-buttons' : 'adjective-buttons-active'}
+      key={index}
+      onClick={() => handleAdjectiveSelection(adjective)}
+    >
+      {adjective}
+    </button>
+  ))}
+</div>
+      <br />
+      <br />
+      <button className='myAdjectiveButton' onClick={handlePlaylistGeneration}>Generate Playlist</button>
     </div>
   );
 };
