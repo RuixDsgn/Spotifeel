@@ -22,7 +22,6 @@ const AdjectiveSelectionPage = ({ mood, setAdjectives, handleGeneratePlaylist })
   };
 
   const [selectedAdjectives, setSelectedAdjectives] = useState([]);
-  const [pickedAdjective, setPickedAdjective] = useState('')
 
   const navigate = useNavigate();
 
@@ -46,12 +45,12 @@ const AdjectiveSelectionPage = ({ mood, setAdjectives, handleGeneratePlaylist })
   };
   
   return (
-    <div>
+    <div className='adjective-div'>
       <h2 className='adjective-h2'>If you could describe your mood: {mood}, in using three adjectives, what would they be?</h2><br />
       <div className='adjective-buttons-div'>
   {mood_adjectives[mood]?.adjectives.map((adjective, index) => (
     <button
-      id={selectedAdjectives.includes(adjective) ? 'adjective-buttons' : 'adjective-buttons-active'}
+      id={selectedAdjectives.includes(adjective) ? 'adjective-buttons-active' : 'adjective-buttons'}
       key={index}
       onClick={() => handleAdjectiveSelection(adjective)}
     >

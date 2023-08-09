@@ -18,13 +18,13 @@ const NewPlaylistPage = ({ accessToken }) => {
   }, []);
 
   return (
-    <div>
-      <h2>Playlist Generated!</h2>
-      <p>Your new playlist is ready.</p>
-      <p>Choose one of the options below:</p>
-      <Link to={`/spotify-app/${playlist_id}`}>Open in Spotify App</Link>
-      <Link to={`/spotify-web/${playlist_id}`}>Open in Spotify Web Player</Link>
-      <Link to="/mood">Start Over</Link>
+    <div className='playlist-div'>
+      <h2 className='new-playlist-h2'>Playlist Generated!</h2>
+      <p className='new-playlist-p'>Your new playlist is ready.</p>
+      <p className='new-playlist-p'>Choose one of the options below:</p>
+      <a className='myPlaylistButton' href='https://open.spotify.com'>Open in Spotify Web Player</a>
+      {/* <Link to={`/spotify-app/${playlist_id}`}>Open in Spotify App</Link> */}
+      <Link className='myPlaylistButton' to="/mood">Start Over</Link>
     </div>
   );
 };

@@ -6,13 +6,12 @@ body {
 }
 
 h1 {
-  margin-top: 200px;
   -webkit-text-stroke:2.5px white;
   -webkit-text-fill-color: transparent;
   font-family: 'Merriweather', serif;
 }
 
-h2 {
+h2, h4 {
 	font-family: 'Roboto', sans-serif;
 	text-align: center;
 }
@@ -24,6 +23,7 @@ p {
 /* Welcome Page */
 
 .welcome-page-div {
+	margin-top: 250px;
 	text-align: center;
 }
 
@@ -56,7 +56,7 @@ p {
 /* Mood Selection */
 
 .mood-h2 {
-	margin-top: 200px;
+	margin-top: 400px;
 }
 
 .myMoodButton {
@@ -92,7 +92,7 @@ p {
 /* Adjective Selection */
 
 .adjective-h2 {
-	margin-top: 200px;
+	margin-top: 400px;
 	text-align: center;
 }
 
@@ -141,11 +141,11 @@ p {
 }
 
 #adjective-buttons-active {
-	color: green;
-	border: 2px solid green;
+	color: white;
+	border: 2px solid #24a0ed;
 	margin-right: 30px;
 	margin-bottom: 10px;
-	background-color: transparent;
+	background-color: #24a0ed;
 	border-radius: 5px;
 	padding: 10px;
 
@@ -156,4 +156,40 @@ p {
 	display: flex;
 	justify-content: center;
 
+}
+
+/* New Playlist Page */
+
+.new-playlist-h2 {
+	margin-top: 200px;
+}
+
+.new-playlist-p {
+	text-align: center;
+}
+
+.myPlaylistButton {
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:linear-gradient(to bottom, #ededed 5%, #dfdfdf 100%);
+	background-color:#ededed;
+	border-radius:6px;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	cursor:pointer;
+	color:#777777;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #ffffff;
+	margin: auto;
+	display: flex;
+	justify-content: center;
+	width: 30%;
+}
+.myPlaylistButton:hover {
+	background:linear-gradient(to bottom, #dfdfdf 5%, #ededed 100%);
+	background-color:#dfdfdf;
+	color: green;
 }
