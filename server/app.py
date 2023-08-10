@@ -62,7 +62,7 @@ def generate_playlist():
         return jsonify({'error': 'Authentication failed. Please check your credentials.'}), 401
 
     # Call the playlist generation method here with the access_token, mood, adjectives, and playlist name
-    playlist_name = 'My Playlist'
+    playlist_name = f'Mood of the day: {mood}'
     playlist_id = generate_spotify_playlist(access_token, mood, adjectives, playlist_name)
 
     if playlist_id:
