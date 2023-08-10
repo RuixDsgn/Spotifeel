@@ -10,7 +10,7 @@ const NewPlaylistPage = ({ accessToken }) => {
       <p className='new-playlist-p'>Your new playlist is ready.</p>
       <p className='new-playlist-p'>Choose one of the options below:</p>
       <a className='myPlaylistButton' href='https://open.spotify.com'>Open in Spotify Web Player</a>
-      <Link to='/playlists'>Show me my Playlists</Link> 
+      <Link className='myPlaylistButton' to='/playlists'>Show me my Playlists</Link> 
       <Link className='myPlaylistButton' to="/mood">Start Over</Link>
     </div>
   );

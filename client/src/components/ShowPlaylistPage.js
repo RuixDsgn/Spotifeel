@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import Playlist from './Playlist';
 
 const ShowPlaylistPage = ({ accessToken }) => {
   const [playlists, setPlaylists] = useState([]);
@@ -21,13 +22,7 @@ const ShowPlaylistPage = ({ accessToken }) => {
     <div>
       <h2>Your Playlists</h2>
       <ul>
-        {playlists.map(playlist => (
-          <li key={playlist.id}>
-            <a href={`https://open.spotify.com/playlist/${playlist.id}`} target="_blank" rel="noopener noreferrer">
-              {playlist.name}
-            </a>
-          </li>
-        ))}
+        <Playlist playlists={playlists}/>
       </ul>
     </div>
   );
