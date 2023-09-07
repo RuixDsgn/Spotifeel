@@ -29,7 +29,7 @@ Spotifeel is a web application that generates Spotify playlists based on your mo
 1. Clone the repository: `git clone https://github.com/your-username/spotifeel.git`
 2. Navigate to the project folder: `cd spotifeel`
 3. Install frontend dependencies: `npm install`
-4. Install backend dependencies: `pip install -r requirements.txt`
+4. Install backend dependencies: `pipenv install`, `pipenv shell`
 
 ### Usage
 
